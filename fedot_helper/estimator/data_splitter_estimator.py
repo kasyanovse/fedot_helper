@@ -6,11 +6,9 @@ from fedot_helper.data import Data
 
 class HorizontalDataSpitterEstimator(Estimator):
     """ Break features by axis=1, run inner estimators and concatenate results """
-
-    estimator: Optional[Tuple[Estimator]] = None
-
-    def __init__(self, estimator: List[Estimator]):
-        self.estimator = tuple(estimator)
+    def __init__(self, estimator: Optional[Tuple[Estimator]] = None):
+        super().__init__()
+        self.estimator = estimator
 
     def slicer(self, x):
         count = len(self.estimator)
@@ -23,10 +21,9 @@ class HorizontalDataSpitterEstimator(Estimator):
             estimator.fit(ix, y)
         return self.estimator
 
-    def predict(self, x: Data, y: Optional[None] = None):
+    def predict(self, x: Data):
         prediction = Data()
         for estimator, ix in zip(self.estimator, self.slicer(x)):
-            prediction = prediction.hstack(estimator.predict(ix, y).predict_to_features())
+            prediction = prediction.hstack(estimator.predict(ix).predict_to_features())
         prediction.predict = prediction.features
         return prediction
-

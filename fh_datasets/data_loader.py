@@ -40,6 +40,6 @@ class M4Loader(Loader):
         else:
             mapper = {'Daily': 'days', 'Hourly': 'hours', 'Weekly': 'weeks'}
             time = time + [timedelta(**{mapper[info['SP']]: 1})] * (len(data) - 1)
-            time = accumulate(time)
+            time = list(accumulate(time))
 
-        return Data(time=time, features=data, target=data)
+        return Data(time=time[:-1], features=data[:-1], target=data[1:], ordered=True)

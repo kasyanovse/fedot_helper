@@ -11,6 +11,7 @@ class Data:
     features: Optional[np.ndarray] = None
     target: Optional[np.ndarray] = None
     predict: Optional[np.ndarray] = None
+    ordered: bool = True  # True if data is time series
 
     _type: Any = np.ndarray
 
@@ -43,7 +44,7 @@ class Data:
                 self.target = np.ravel(self.target)
 
     def __repr__(self):
-        return (f"time: {self.time.shape if self.time is not None else None}"
+        return (f"time: {self.time.shape if self.time is not None else None} "
                 f"features: {self.features.shape if self.features is not None else None} "
                 f"target: {self.target.shape if self.target is not None else None} "
                 f"predict: {self.predict.shape if self.predict is not None else None} "
@@ -62,6 +63,10 @@ class Data:
         return None if self.time is None else len(self)
 
     @property
+    def target_len(self):
+        return self.target.shape[0]
+
+    @property
     def feature_shape(self):
         return None if self.features is None else self.features.shape[1:]
 
@@ -70,14 +75,14 @@ class Data:
         return None if self.features is None else self.features.shape
 
     # concat and slice
-    def __getitem__(self, item: Union[slice, Tuple[slice]]):
+    def __getitem__(self, item: Union[slice, Tuple[slice], Collection]):
         data = self.copy()
 
         if isinstance(item, tuple):
             data.features = data.features[(slice(None), ) + item[1:]]
             item = item[0]
 
-        if item != slice(None):
+        if not isinstance(item, slice) or item != slice(None):
             data.time = data.time[item]
             data.features = data.features[item]
             data.target = data.target[item]
@@ -111,7 +116,12 @@ class Data:
         else:
             return Data.vstack(None, [self] + data)
 
-    # convert
+    # predict
+    def add_predict(self, predict: np.array):
+        new = self.copy()
+        new.predict = predict
+        return new
+
     def predict_to_features(self):
         return Data(time=self.time,
                     features=self.predict,
@@ -135,12 +145,14 @@ class Data:
     def copy(self):
         return Data(time=self.time,
                     features=self.features,
-                    target=self.target)
+                    target=self.target,
+                    ordered=self.ordered)
 
     def deepcopy(self):
         return Data(time=self.time.copy(),
                     features=self.features.copy(),
-                    target=self.target.copy())
+                    target=self.target.copy(),
+                    ordered=self.ordered)
 
     #checks
     def has_predict(self):

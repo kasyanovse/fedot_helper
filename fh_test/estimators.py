@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 
 from fedot_helper.data import Data
+from fedot_helper.estimator.baseline_estimator import NaiveEstimator
 from fedot_helper.estimator.estimator import Estimator
 
 
@@ -19,12 +20,7 @@ class EstimatorForTest(Estimator):
         self.model.fit(x.features.reshape((x.features.shape[0], -1)), x.target)
         return self
 
-    def predict(self, x: Data, y: Optional[Data] = None):
+    def predict(self, x: Data):
         new = x.copy()
-        new.predict = self.model.predict(x.features.reshape((x.features.shape[0], -1)), x.target)
+        new.predict = self.model.predict(x.features.reshape((x.features.shape[0], -1)))
         return new
-
-
-class NaiveEstimator(Estimator):
-    def predict(self, x, y = None):
-        return y
