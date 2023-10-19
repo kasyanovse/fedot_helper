@@ -1,23 +1,24 @@
 from collections.abc import Collection
-from dataclasses import dataclass
 from typing import Optional, Any, Tuple, Union, List
 
 import numpy as np
 
 
-@dataclass
 class Data:
-    time: Optional[np.ndarray] = None
-    features: Optional[np.ndarray] = None
-    target: Optional[np.ndarray] = None
-    predict: Optional[np.ndarray] = None
-    ordered: bool = True  # True if data is time series
-
     _type: Any = np.ndarray
 
-    def __post_init__(self):
-        if self.target is None:
-            self.target = self.features
+    def __init__(self,
+                 time: Optional[np.ndarray] = None,
+                 features: Optional[np.ndarray] = None,
+                 target: Optional[np.ndarray] = None,
+                 predict: Optional[np.ndarray] = None,
+                 ordered: bool = True):
+        self.features = features
+        self.target = target if target is not None else self.features
+        self.time = time
+        self.predict = predict
+        self.ordered = ordered
+
         if self.time is None and self.target is not None:
             self.time = np.arange(len(self.target))
 
