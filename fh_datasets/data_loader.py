@@ -42,4 +42,4 @@ class M4Loader(Loader):
             time = time + [timedelta(**{mapper[info['SP']]: 1})] * (len(data) - 1)
             time = list(accumulate(time))
 
-        return Data(time=time[:-1], features=data[:-1], target=data[1:], ordered=True)
+        return Data(index=time[:-1], features=data[:-1], target=data[1:], ordered=True)

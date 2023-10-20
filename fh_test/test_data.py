@@ -6,24 +6,24 @@ from fh_datasets.generated_data import random_data
 
 
 def get_data(shape=9):
-    return Data(time=np.arange(shape) + 1,
+    return Data(index=np.arange(shape) + 1,
                 features=np.reshape((np.arange(shape * shape) + 1) * 10, (shape, shape)),
                 target=(np.arange(shape) + 1) * 100)
 
 
-@pytest.mark.parametrize(('time', 'features', 'target'),
+@pytest.mark.parametrize(('index', 'features', 'target'),
                          [(None, [0, 1, 2, 3, 4, 5], None),
                           ([0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5], None),
                           (None, [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5]),
                           ([0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5])])
-def test_data_creation(time, features, target):
-    data = Data(time=time, features=features, target=target)
-    assert isinstance(data.time, data._type)
+def test_data_creation(index, features, target):
+    data = Data(index=index, features=features, target=target)
+    assert isinstance(data.index, data._type)
     assert isinstance(data.features, data._type)
     assert isinstance(data.target, data._type)
-    assert np.array_equal(np.ravel(data.time), np.ravel(data.features))
+    assert np.array_equal(np.ravel(data.index), np.ravel(data.features))
     assert np.array_equal(np.ravel(data.target), np.ravel(data.features))
-    assert len(data) == len(data.time)
+    assert len(data) == len(data.index)
     assert data.len == len(data)
     assert data.shape == data.features.shape
     assert data.feature_shape == data.features.shape[1:]
@@ -43,7 +43,7 @@ def test_data_slice(start, stop, step):
     sliced = data[start:stop:step]
     indexes = np.arange(len(data))[start:stop:step]
 
-    assert np.array_equal(sliced.time, np.take(np.array(data.time), indexes, 0))
+    assert np.array_equal(sliced.index, np.take(np.array(data.index), indexes, 0))
     assert np.array_equal(sliced.features, np.take(np.array(data.features), indexes, 0))
     assert np.array_equal(sliced.target, np.take(np.array(data.target), indexes, 0))
 
@@ -53,7 +53,7 @@ def test_data_copy():
     copied_data = data.copy()
 
     assert data is not copied_data
-    assert copied_data.time is data.time
+    assert copied_data.index is data.index
     assert copied_data.features is data.features
     assert copied_data.target is data.target
 
@@ -63,10 +63,10 @@ def test_data_deepcopy():
     copied_data = data.deepcopy()
 
     assert data is not copied_data
-    assert copied_data.time is not data.time
+    assert copied_data.index is not data.index
     assert copied_data.features is not data.features
     assert copied_data.target is not data.target
-    assert np.array_equal(copied_data.time, data.time)
+    assert np.array_equal(copied_data.index, data.index)
     assert np.array_equal(copied_data.features, data.features)
     assert np.array_equal(copied_data.target, data.target)
 
@@ -78,14 +78,14 @@ def test_eq():
     assert datas[0] != datas[0][::2]
 
     data = datas[0].copy()
-    data.time = data.time.copy()
+    data.index = data.index.copy()
     assert datas[0] == data
 
     data = datas[0].deepcopy()
     assert datas[0] == data
 
     data = datas[0].deepcopy()
-    data.time[0] = data.time[0] + 1
+    data.index[0] = data.index[0] + 1
     assert datas[0] != data
 
     data = datas[0].deepcopy()
@@ -120,7 +120,7 @@ def test_hstack():
     # case 3
     with pytest.raises(ValueError):
         new_datas = [data.deepcopy() for data in datas]
-        new_datas[0].time = new_datas[0].time[1:]
+        new_datas[0].index = new_datas[0].index[1:]
         test(datas, Data().hstack(new_datas))
 
     # case 4
